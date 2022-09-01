@@ -1,0 +1,169 @@
+---
+title: "Notes de préparation"
+format: html
+editor: visual
+bibliography: references.bib
+---
+
+# Contexte
+
+Ce document regroupe une série de notes employées enfin de proposer un poster dans le cadre du Mardi des chercheurs 2022.
+
+# Notes
+
+```{r setup}
+#| echo: false
+#| include: false
+SciViews::R
+library(here)
+library(sf)
+library(mapview)
+```
+
+## Abstract sur la thématique
+
+Cet article n'a pas été été publié
+
+Titre : Comparison of horizontal and vertical sampling in Corsica (N.-W. Mediterranean Sea) plankton time series analyzed with ZooImage
+
+A mesozooplankton community of the Bay of Calvi, Corsica, France was recently explored over a period of 13 years through automatic image analysis using ZooImage (Fullgrabe et al, 2020). A "typical" year was defined, and variations around the average pattern were correlated mainly with temperature, nutrients and wind regime. The spring peak is particularly sensitive as it is the most varying part of the seasonal change in that community.
+
+The time series came from horizontal net tows, thus sampling only subsurface plankton. Most plankton communities are studied by means of vertical or oblique sampling of the whole water column. The representativity of that horizontal series is questioned by comparing it with vertical net tows done on the same site. 
+
+The spring (Copepoda) and summer (Cladorerans) peaks are more visible in horizontal sampling, but otherwise, global trends are similar when both time series are compared over 4 years. Decapod larvea (zoe) and Cladocerans are more abundant in horizontal samples. Phaeodaria, several Cnidarians (i.e;, Hydrozoa like Physonectae and Rhopalonematidae) and some Appendicularians (Fritillariidae) are more abundant in vertical samplings, and are thus present deeper in the water column. Although horizontal sampling does not always produce a representative picture of the plankton community over the whole water column, they produce similar trends in our Corsican time series at large taxonomic resolution (classes or orders, mainly), with even more sensitive observation of plankton peaks.
+
+## Les séries spatio-temporelles en mer Mediterranée
+
+On dénombre en Mer Méditerranée différentes stations de recherches qui réalisent un suivi sur le long terme de paramètres biologiques (suivi de la communauté planctonique, particule organique dissoute,...) et de paramètres physico-chimique (salinité, température, turbudité,...)
+
+```{r}
+station <- read(here("data", "station_medit.csv"))
+station <- st_as_sf(station, coords = c("longitude", "latitude"), crs = 4326)
+mapview(station, zcol = "trait", map.types = "Esri.WorldShadedRelief", layer.name = "Station")
+```
+
+On remarque que Calvi à la particularité d'étudier une série verticale et une série horizontale.
+
+## Séries de Calvi
+
+L'analyse de la série temporelle horizontalede 13 années consécutives de 2004 à 2016 en baie de calvi est un élément important dans notre comparaison [@fullgrabe2020]. En effet, cette étude porte sur 14 groupes obtenu par des prélèvement en subsurface. Cette étude a pour particularité la mise en évidence de 8 stades de la communauté planctonique qui varie au cours d'une année. Sur les 13 années, un motif annuel se dégage.
+
+La série verticale a débuté plus tardivement. Des mesures régulières ont été prises à partir de 2014.
+
+L'abondance totale (individus/m^3^) au cours du temps montre pics similaires entre la série horizontale (noire) et la série verticale (en rouge).
+
+```{r}
+tsh <- read(here::here("data/ts_horiz_abd_tot.rds"))
+tsv <- read(here::here("data/ts_verti_abd_tot.rds"))
+
+chart(data = tsh, abd_tot ~ time) +
+  geom_line() +
+  geom_line(data = tsv, color = "red")
+
+ggsave("../figures/r_figures/adb_tot.tiff", 
+  units="cm", device = "tiff", width = 12, height = 8)
+```
+
+La série verticale comprend 335 échantillons et la série verticale 76 échantillons. Une première approche a été de comparer des point de mesures prélevé dans des conditions comparables. Les éléments choisi etaiant 2 jours de tolérance et 2h de tolérance. Cela permit d'extraire 30 échantillons de comparable.
+
+Le comparaison est réalisé sur base des abondances relatives des groupes d'intérêts.
+
+```{r}
+hv_comp <- read(here::here("data/hv_rel_abd.rds"))
+
+hv_comp <- hv_comp*100
+```
+
+```{r}
+
+max_lab <- max(c(hv_comp$rel_abd_phaeodaria_v, hv_comp$rel_abd_phaeodaria_h))
+
+#rlm. <- MASS::rlm(data = hv_comp, rel_abd_phaeodaria_v ~ rel_abd_phaeodaria_h-1)
+#coef(rlm.)
+
+#chart(data = hv_comp, rel_abd_phaeodaria_v ~ rel_abd_phaeodaria_h) +
+#  geom_abline(intercept = 0, color="black", linetype="dashed", size=1) +
+#  geom_point(color = "#649B88") +
+#  scale_x_continuous(
+#    name="abondance relative (%) traits horizontaux", 
+#    limits = c(0,max_lab*1.5)) +
+#      scale_y_continuous(
+#        name="abondance relative (%) traits verticaux",
+#        limits = c(0,max_lab*1.5)) +
+#  geom_smooth(method = MASS::rlm, formula = y~x-1, color="red",linetype#="dashed", size=0.8, se= FALSE)
+
+chart(data = hv_comp, rel_abd_phaeodaria_v ~ rel_abd_phaeodaria_h) +
+  geom_abline(intercept = 0, color="black", linetype="dashed", size=1)+
+  geom_point(color = "#649B88") +
+  scale_x_continuous(
+    name="abondance relative (%) traits horizontaux", 
+    limits = c(0, max_lab*1.5)) +
+      scale_y_continuous(
+        name="abondance relative (%) traits verticaux",
+        limits = c(0, max_lab*1.5))+
+  geom_smooth(method = lm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
+  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
+  labs(title = "Phaeodaria")
+ggsave("../figures/r_figures/adb_rel_phaeo.tiff", 
+  units= "cm", device = "tiff", width = 12, height = 8)
+
+```
+
+```{r}
+max_lab <- max(c(hv_comp$rel_abd_fritillariidae_v, hv_comp$rel_abd_fritillariidae_h))
+
+chart(data = hv_comp, rel_abd_fritillariidae_v ~ rel_abd_fritillariidae_h) +
+  geom_abline(intercept = 0, color="black", linetype = "dashed", size = 1)+
+  geom_point(color = "#649B88")+
+  scale_x_continuous(
+    name="abondance relative (%) traits horizontaux", 
+    limits = c(0, max_lab*1.5))+
+      scale_y_continuous(
+        name="abondance relative (%) traits verticaux",
+        limits = c(0, max_lab*1.5)) +
+  geom_smooth(method = MASS::rlm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
+  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
+  labs(title = "Fritillariidae")
+ggsave("../figures/r_figures/adb_rel_fritillaridae.tiff", 
+  units= "cm", device = "tiff", width = 12, height = 8)
+```
+
+```{r}
+max_lab <- max(c(hv_comp$rel_abd_cladocera_other_v, hv_comp$rel_abd_cladocera_other_h))
+
+chart(data = hv_comp, rel_abd_cladocera_other_v ~ rel_abd_cladocera_other_h) +
+  geom_abline(intercept = 0, color="black", linetype="dashed", size=1)+
+  geom_point(color = "#649B88")+
+  scale_x_continuous(
+    name="abondance relative (%) traits horizontaux", 
+    limits = c(0, max_lab*1.5))+
+      scale_y_continuous(
+        name="abondance relative (%) traits verticaux",
+        limits = c(0, max_lab*1.5)) +
+  geom_smooth(method = MASS::rlm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
+  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
+  labs(title = "Cladocera")
+ggsave("../figures/r_figures/adb_rel_cladocera.tiff", 
+  units= "cm", device = "tiff", width = 12, height = 8)
+```
+
+```{r}
+max_lab <- max(c(hv_comp$rel_abd_decapoda_zoea_larva_v, hv_comp$rel_abd_decapoda_zoea_larva_h))
+
+chart(data = hv_comp, rel_abd_decapoda_zoea_larva_v ~ rel_abd_decapoda_zoea_larva_h) +
+  geom_abline(intercept = 0, color="black", linetype="dashed", size=1)+
+  geom_point(color = "#649B88")+
+  scale_x_continuous(
+    name="abondance relative (%) traits horizontaux", 
+    limits = c(0, max_lab*1.5))+
+      scale_y_continuous(
+        name="abondance relative (%) traits verticaux",
+        limits = c(0, max_lab*1.5)) +
+  geom_smooth(method = MASS::rlm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
+  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
+  labs(title = "Decapoda")
+ggsave("../figures/r_figures/adb_rel_decapoda.tiff", 
+  units= "cm", device = "tiff", width = 12, height = 8)
+```
+
+La prochaine étape est de proposée une comparaison non pas sur 30 échantillons mais sur l'ensemble des 2 série temporelles.

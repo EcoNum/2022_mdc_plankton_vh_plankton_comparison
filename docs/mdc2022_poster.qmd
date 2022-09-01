@@ -1,0 +1,170 @@
+---
+title: "Comparaison de l’échantillonnage horizontal et vertical dans la série spatio-temporelle du plancton de Corse (France) avec ZooImage"
+format: html
+author: "G. Engels & Ph.Grosjan"
+editor: visual
+bibliography: references.bib
+---
+
+# Abstract (max 100 mots)
+
+TODO
+
+```{r}
+#| name: setup
+#| include: false
+SciViews::R
+```
+
+# Introduction
+
+Les organismes planctoniques se définissent par l'incapacité de lutter contre le courant. On retrouve parmi ces organismes les méduses, les larves de poissons ou encore le krill. Ces organismes sont à la base de nombreuses chaines alimentaires. L'étude de l'abondance du plancton et de ces variations au cours du temps est indispensable.
+
+Le plancton est échantillonné principalement par des traits de filets. Chaque prélèvement permet la collecte de plusieurs centaines à quelques milliers d'organismes. La classification des organismes est facilités à l'aide de la classification semi-automatise. Les échantillons sont numérisées et analyser afin d'extraire chaque organisme. Grâce à un set d'apprentissage réalisé par des spécialistes du plancton, des algorithmes sont capable de classé les organismes. Il reste à l'expérimentateur à valider ce classement [@philippe2014].
+
+```{r}
+library("sf")
+library("rnaturalearth")
+library("rnaturalearthdata")
+library("ggspatial")
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+#class(world)
+
+station <- read(here::here("data/station_medit.csv")) %>.%
+  mutate(., latitude = as.numeric(latitude), longitude = as.numeric(longitude))
+
+station_v <- filter(station, trait == "vertical")
+station_hv <- filter(station, trait == "horizontal-vertical")
+station_do <- filter(station, trait == "Double oblique")
+
+map <- ggplot(data = world) +
+  geom_sf(color = "black", fill = "#C8AD7F") +
+  coord_sf(xlim = c(-8, 40), ylim = c(30, 48), expand = FALSE) +
+  xlab("Longitude") + ylab("Latitude") +
+  ggtitle("Mer Méditerranée") +
+  theme(panel.background = element_rect(fill="#80D0D0")) +
+  annotation_north_arrow(location = "bl", which_north = "true",
+                         pad_x = unit(0, "in"), pad_y = unit(2.6, "in"),
+                         style = north_arrow_fancy_orienteering) +
+  annotation_scale(location = "bl") +
+  annotate(geom = "point", x = station_v$longitude, y = station_v$latitude, size = 3, color = "yellow") +
+  annotate(geom = "point", x = station_hv$longitude, y = station_hv$latitude, size = 3, color = "red") +
+  annotate(geom = "point", x = station_do$longitude, y = station_do$latitude, size = 3, color = "purple")
+
+map
+
+#ggsave(filename = "figures/r_figures/map.tiff", device = "tiff", units = "cm", width = 12, height = 8)
+```
+
+En mer Méditerranée, on dénombre 9 séries temporelles monitoré en continu de plus de 10 ans. Différentes méthodes d'échantillonnages sont effectuée. La majorité des suivis sont effectuée via des traits de filets verticaux (point jaune). En Espagne, il a été décidé de réaliser des traits de filets en double oblique (point mauve). La station de recherche de Calvi (Corse, France) réalisé un suivi via des traits horizontaux et a débuté des prélèvements verticaux (point rouge).
+
+```{r}
+tsh <- read(here::here("data/ts_horiz_abd_tot.rds"))
+tsv <- read(here::here("data/ts_verti_abd_tot.rds"))
+
+chart(data = tsh, abd_tot ~ time) +
+  geom_line() +
+  geom_line(data = tsv, color = "red")
+
+#ggsave("../figures/r_figures/adb_tot.tiff", 
+#  units="cm", device = "tiff", width = 12, height = 8)
+```
+
+La série spatio-temporelle en subsurface (obtenu via des traits de filets horizontaux) a permis de mettre en évidence une année typique de la variation du plancton. Trois années particulière ont été obtenues 2007, 2012 et 2015. Les anomalies d'abondance en plancton sont corrélées avec la température, la disponibilité en nutriments et les vents [@fullgrabe2020a]. La série spatio-temporelle obtenue via des traits verticaux (en rouge) débute en 2014
+
+```{r}
+#| include: false
+
+hv_comp <- read(here::here("data/hv_rel_abd.rds"))
+hv_comp <- hv_comp*100
+# Phaeodaria ----
+max_lab <- max(c(hv_comp$rel_abd_phaeodaria_v, hv_comp$rel_abd_phaeodaria_h))
+
+p1 <- chart(data = hv_comp, rel_abd_phaeodaria_v ~ rel_abd_phaeodaria_h) +
+  geom_abline(intercept = 0, color="black", linetype="dashed", size=1)+
+  geom_point(color = "#649B88") +
+  scale_x_continuous(
+    name="abondance relative (%) traits horizontaux", 
+    limits = c(0, max_lab*1.5)) +
+      scale_y_continuous(
+        name="abondance relative (%) traits verticaux",
+        limits = c(0, max_lab*1.5))+
+  geom_smooth(method = lm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
+  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
+  labs(title = "Phaeodaria")
+#p1
+#ggsave("../figures/r_figures/adb_rel_phaeo.tiff", 
+#  units= "cm", device = "tiff", width = 12, height = 8)
+
+# Fritillaridae -----
+
+max_lab <- max(c(hv_comp$rel_abd_fritillariidae_v, hv_comp$rel_abd_fritillariidae_h))
+
+p2 <- chart(data = hv_comp, rel_abd_fritillariidae_v ~ rel_abd_fritillariidae_h) +
+  geom_abline(intercept = 0, color="black", linetype = "dashed", size = 1)+
+  geom_point(color = "#649B88")+
+  scale_x_continuous(
+    name="abondance relative (%) traits horizontaux", 
+    limits = c(0, max_lab*1.5))+
+      scale_y_continuous(
+        name="abondance relative (%) traits verticaux",
+        limits = c(0, max_lab*1.5)) +
+  geom_smooth(method = MASS::rlm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
+  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
+  labs(title = "Fritillariidae")
+#p2
+#ggsave("../figures/r_figures/adb_rel_fritillaridae.tiff", 
+#  units= "cm", device = "tiff", width = 12, height = 8)
+
+# Decapoda ----
+max_lab <- max(c(hv_comp$rel_abd_decapoda_zoea_larva_v, hv_comp$rel_abd_decapoda_zoea_larva_h))
+
+p3 <- chart(data = hv_comp, rel_abd_decapoda_zoea_larva_v ~ rel_abd_decapoda_zoea_larva_h) +
+  geom_abline(intercept = 0, color="black", linetype="dashed", size=1)+
+  geom_point(color = "#649B88")+
+  scale_x_continuous(
+    name="abondance relative (%) traits horizontaux", 
+    limits = c(0, max_lab*1.5))+
+      scale_y_continuous(
+        name="abondance relative (%) traits verticaux",
+        limits = c(0, max_lab*1.5)) +
+  geom_smooth(method = MASS::rlm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
+  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
+  labs(title = "Decapoda")
+
+#p3
+#ggsave("../figures/r_figures/adb_rel_decapoda.tiff", 
+#  units= "cm", device = "tiff", width = 12, height = 8)
+
+# cladocera -----
+max_lab <- max(c(hv_comp$rel_abd_cladocera_other_v, hv_comp$rel_abd_cladocera_other_h))
+
+p4 <- chart(data = hv_comp, rel_abd_cladocera_other_v ~ rel_abd_cladocera_other_h) +
+  geom_abline(intercept = 0, color="black", linetype="dashed", size=1)+
+  geom_point(color = "#649B88")+
+  scale_x_continuous(
+    name="abondance relative (%) traits horizontaux", 
+    limits = c(0, max_lab*1.5))+
+      scale_y_continuous(
+        name="abondance relative (%) traits verticaux",
+        limits = c(0, max_lab*1.5)) +
+  geom_smooth(method = MASS::rlm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
+  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
+  labs(title = "Cladocera")
+#p4
+#ggsave("../figures/r_figures/adb_rel_cladocera.tiff", 
+#  units= "cm", device = "tiff", width = 12, height = 8)
+```
+
+```{r}
+combine_charts(list(p1,p2,p3,p4))
+```
+
+On dénombre 335 échantillons horizontaux et 76 verticaux. En appliquant une fenêtre de tolérance de 2 jours d'écart maximum et de 2h d'ecart, 30 stations ont été retenue. La tendance globale entre les deux séries est similaire. Cependant, la comparaison des groupes d'intérêt met en avant des différences.
+
+La sous classe des Phaedoria (chromiste) et la famille des Fritillaridea (tunicier) sont plus abondantes dans les traits de filets verticaux alors que l'ordre des Decapoda (crustacée) et l'ordre des Cladocera (crustacée) est plus abondants dans les trait de plancton horizontaux.
+
+# Perspectives
+
+La comparaison par station similaire réduit trop fortement le nombre d'observation. La prochaine étape de cette étude est de proposer une comparaison les deux séries temporelles directement afin d'utiliser l'ensemble des données disponibles. Cette comparaison va permettre de faire le lien entre les traits verticaux et les traits horizontaux.

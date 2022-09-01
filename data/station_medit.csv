@@ -1,0 +1,10 @@
+station,localisation,latitude,longitude,trait,url
+Gulf of Trieste LTER-C1,Northern Adriatic Sea,45.7010,13.7100,vertical,https://www.st.nmfs.noaa.gov/copepod/time-series/it-30201/
+Gulf of Naples LTER-MC,Tyrrhenian Sea,40.808,14.2500,vertical,https://www.st.nmfs.noaa.gov/copepod/time-series/it-30101/
+Stončica,central Adriatic Sea,43.0440,16.2850,vertical,https://www.st.nmfs.noaa.gov/copepod/time-series/hr-10101/
+Saronikos Gulf S11,Aegean Sea,37.8726,23.6383,vertical,https://www.st.nmfs.noaa.gov/copepod/time-series/gr-10101/
+Villefranche Point B,Cote d'Azur,43.6830,7.3170,vertical,https://www.st.nmfs.noaa.gov/copepod/time-series/fr-10101/
+Málaga Bay,Alboran Sea,36.6960,-4.4058,Double oblique,https://www.st.nmfs.noaa.gov/copepod/time-series/es-50301/
+Baleares Station,Mallorca Channel,39.4765,2.4272,Double oblique,https://www.st.nmfs.noaa.gov/copepod/time-series/es-50201/
+PHYTOCLY Time Series,Bay of Calvi,42.5808,8.7285,horizontal-vertical,https://www.st.nmfs.noaa.gov/copepod/time-series/be-10101/
+Batroun B2,Bassin Levantin,34.4711,35.6186,vertical,"NA"
