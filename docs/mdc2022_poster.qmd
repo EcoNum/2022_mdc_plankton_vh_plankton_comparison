@@ -1,14 +1,29 @@
 ---
 title: "Comparaison de l’échantillonnage horizontal et vertical dans la série spatio-temporelle du plancton de Corse (France) avec ZooImage"
 format: html
-author: "G. Engels & Ph.Grosjan"
+author: 
+  - name: "Guyliann Engels" 
+    corresponding: true
+    affiliations:
+      - name: "Service d'Écologie Numérique, Institut Complexys et Infortech, Université de Mons (UMONS)"
+        address: "23 place du Parc"
+        city: "Mons"
+        country: "Belgique"
+  - name: "Philippe Grosjean"
+    affiliations:
+      - name: "Service d'Écologie Numérique, Institut Complexys et Infortech, Université de Mons (UMONS)"
+        address: "23 place du Parc"
+        city: "Mons"
+        country: "Belgique"
 editor: visual
 bibliography: references.bib
 ---
 
 # Abstract (max 100 mots)
 
-TODO
+Le plancton composé entre autres des méduses, des larves de poissons ou encore de copépodes. Les organismes planctoniques sont à la base de nombreuses chaines alimentaires marines. Les étudier est par conséquent d'une importance capitale aussi bien du point de vue écologique qu'économique. On compte neuf sites où les prélèvements sont réguliers et sur plus de dix ans en Mer Méditerranée. Différentes méthodes d'échantillonnage sont employées dont le plus utilisé est le trait de filet (vertical, horizontal, double oblique). La comparaison entre ces méthodes est un point essentiel dans la compréhension globale du plancton en mer Méditerranée.
+
+# Introduction
 
 ```{r}
 #| name: setup
@@ -16,11 +31,9 @@ TODO
 SciViews::R
 ```
 
-# Introduction
+Les organismes planctoniques se définissent par l'incapacité de lutter contre le courant. On retrouve parmi ces organismes les méduses, les larves de poissons ou encore le krill. Ces organismes sont à la base de nombreuses chaines alimentaires. L'étude de la diversité, l'abondance ou encore de la biomasse du plancton et de leurs variations au cours du temps est indispensable dans la compréhension des écosystèmes.
 
-Les organismes planctoniques se définissent par l'incapacité de lutter contre le courant. On retrouve parmi ces organismes les méduses, les larves de poissons ou encore le krill. Ces organismes sont à la base de nombreuses chaines alimentaires. L'étude de l'abondance du plancton et de ces variations au cours du temps est indispensable.
-
-Le plancton est échantillonné principalement par des traits de filets. Chaque prélèvement permet la collecte de plusieurs centaines à quelques milliers d'organismes. La classification des organismes est facilités à l'aide de la classification semi-automatise. Les échantillons sont numérisées et analyser afin d'extraire chaque organisme. Grâce à un set d'apprentissage réalisé par des spécialistes du plancton, des algorithmes sont capable de classé les organismes. Il reste à l'expérimentateur à valider ce classement [@philippe2014].
+Le plancton est échantillonné principalement par des traits de filets. Chaque prélèvement permet la collecte de plusieurs centaines à quelques milliers d'organismes. La classification des organismes est facilitée à l'aide de la classification semi-automatisée. Les échantillons sont numérisés et analysés afin d'extraire chaque organisme. Grâce à un set d'apprentissage réalisé par des spécialistes du plancton, des algorithmes sont capables de classer les organismes. Il reste à l'expérimentateur à valider ce classement [@philippe2014].
 
 ```{r}
 library("sf")
@@ -57,7 +70,7 @@ map
 #ggsave(filename = "figures/r_figures/map.tiff", device = "tiff", units = "cm", width = 12, height = 8)
 ```
 
-En mer Méditerranée, on dénombre 9 séries temporelles monitoré en continu de plus de 10 ans. Différentes méthodes d'échantillonnages sont effectuée. La majorité des suivis sont effectuée via des traits de filets verticaux (point jaune). En Espagne, il a été décidé de réaliser des traits de filets en double oblique (point mauve). La station de recherche de Calvi (Corse, France) réalisé un suivi via des traits horizontaux et a débuté des prélèvements verticaux (point rouge).
+En mer Méditerranée, on dénombre 9 séries temporelles étudiées en continu de plus de 10 ans. Différentes méthodes d'échantillonnages sont effectuées. La majorité des suivis sont effectués via des traits de filets verticaux (point jaune). En Espagne, il a été décidé de réaliser des traits de filets en double oblique (point mauve). La station de recherche de Calvi (Corse, France) a réalisé un suivi via des traits horizontaux et a débuté des prélèvements verticaux (point rouge).
 
 ```{r}
 tsh <- read(here::here("data/ts_horiz_abd_tot.rds"))
@@ -71,7 +84,7 @@ chart(data = tsh, abd_tot ~ time) +
 #  units="cm", device = "tiff", width = 12, height = 8)
 ```
 
-La série spatio-temporelle en subsurface (obtenu via des traits de filets horizontaux) a permis de mettre en évidence une année typique de la variation du plancton. Trois années particulière ont été obtenues 2007, 2012 et 2015. Les anomalies d'abondance en plancton sont corrélées avec la température, la disponibilité en nutriments et les vents [@fullgrabe2020a]. La série spatio-temporelle obtenue via des traits verticaux (en rouge) débute en 2014
+La tendance globale entre la série obtenue vie les traits horizontaux (en noir) et via les traits verticaux (en rouge) est similaire. La série spatio-temporelle en subsurface a précédemment été étudiée. Cette étude a mis en évidence une année typique de la variation du plancton. Trois années particulières ont été détectées en 2007, 2012 et 2015. L'abondance totale au cours du temps y a été faible. Ces anomalies d'abondance en plancton sont corrélées avec la température et la disponibilité en nutriments [@fullgrabe2020a].
 
 ```{r}
 #| include: false
@@ -161,10 +174,10 @@ p4 <- chart(data = hv_comp, rel_abd_cladocera_other_v ~ rel_abd_cladocera_other_
 combine_charts(list(p1,p2,p3,p4))
 ```
 
-On dénombre 335 échantillons horizontaux et 76 verticaux. En appliquant une fenêtre de tolérance de 2 jours d'écart maximum et de 2h d'ecart, 30 stations ont été retenue. La tendance globale entre les deux séries est similaire. Cependant, la comparaison des groupes d'intérêt met en avant des différences.
+On dénombre 335 échantillons horizontaux et 76 verticaux. En appliquant une fenêtre de tolérance de 2 jours d'écart maximum et de 2h d'écart, 30 stations ont été retenues. Malgré une tendance globale similaire, la comparaison des groupes d'intérêt met en avant des différences.
 
-La sous classe des Phaedoria (chromiste) et la famille des Fritillaridea (tunicier) sont plus abondantes dans les traits de filets verticaux alors que l'ordre des Decapoda (crustacée) et l'ordre des Cladocera (crustacée) est plus abondants dans les trait de plancton horizontaux.
+La sous-classe des Phaedoria (chromiste) et la famille des Fritillaridea (tunicier) sont plus abondantes dans les traits de filets verticaux alors que l'ordre des Decapoda (crustacée) et l'ordre des Cladocera (crustacée) sont plus abondants dans les traits de plancton horizontaux.
 
 # Perspectives
 
-La comparaison par station similaire réduit trop fortement le nombre d'observation. La prochaine étape de cette étude est de proposer une comparaison les deux séries temporelles directement afin d'utiliser l'ensemble des données disponibles. Cette comparaison va permettre de faire le lien entre les traits verticaux et les traits horizontaux.
+La comparaison par station similaire réduit trop fortement le nombre d'observations. La prochaine étape de cette étude est de proposer une comparaison avec les deux séries temporelles directement afin d'utiliser l'ensemble des données disponibles. Cette comparaison va permettre de faire le lien entre les traits verticaux et les traits horizontaux.
