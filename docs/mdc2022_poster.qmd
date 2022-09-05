@@ -1,21 +1,64 @@
 ---
 title: "Comparaison de l’échantillonnage horizontal et vertical dans la série spatio-temporelle du plancton de Corse (France) avec ZooImage"
-format: html
 author: 
   - name: "Guyliann Engels" 
     corresponding: true
     affiliations:
-      - name: "Service d'Écologie Numérique, Institut Complexys et Infortech, Université de Mons (UMONS)"
-        address: "23 place du Parc"
+      - name: "Service d'Écologie Numérique, Institut COMPLEXYS et Infortech, Université de Mons (UMONS)"
         city: "Mons"
         country: "Belgique"
+  - name: "Remy Dugauquier"
+    affiliations:
+      - name: "Service d'Écologie Numérique, Institut COMPLEXYS, Université de Mons (UMONS)"
+        city: "Mons"
+        country: "Belgique"
+  - name: "Thomas Quivy"
+    affiliations:
+      - name: "Service d'Écologie Numérique, Institut COMPLEXYS, Université de Mons (UMONS)"
+        city: "Mons"
+        country: "Belgique" 
+  - name: "Lovina Fullgrabe"
+    affiliations:
+      - name: "Service d'Écologie Numérique, Institut COMPLEXYS, Université de Mons (UMONS)"
+        city: "Mons"
+        country: "Belgique"
+      - name: "Station de Recherches Sous-marines et Océanographique, STARESO"
+        city: "Calvi"
+        country: "France"
+  - name: "Sylvie Gobert"
+    affiliations:
+      - name: "Laboratoire d'Océanographie, FOCUS, Université de Liège"
+        city: "Liège"
+        country: "Belgique"
+      - name: "Station de Recherches Sous-marines et Océanographique, STARESO"
+        city: "Calvi"
+        country: "France"
+  - name: "Pierre Lejeune"
+    affiliations:
+      - name: "Station de Recherches Sous-marines et Océanographique, STARESO"
+        city: "Calvi"
+        country: "France"
+  - name: "Michèle Leduc"
+    affiliations:
+      - name: "Station de Recherches Sous-marines et Océanographique, STARESO"
+        city: "Calvi"
+        country: "France"
+  - name: "Pierre Boissery"
+    affiliations:
+      - name: "Agence de l'Eau Rhône-Médterrané-Corse, Délégation de Marseille"
+        city: "Marseille"
+        country: "France"
   - name: "Philippe Grosjean"
     affiliations:
-      - name: "Service d'Écologie Numérique, Institut Complexys et Infortech, Université de Mons (UMONS)"
-        address: "23 place du Parc"
+      - name: "Service d'Écologie Numérique, Institut COMPLEXYS, Université de Mons (UMONS)"
         city: "Mons"
         country: "Belgique"
 editor: visual
+format: 
+  html:
+    code-fold: true
+    toc: true
+    number-sections: true
 bibliography: references.bib
 ---
 
@@ -27,13 +70,13 @@ Le plancton est composé entre autres des méduses, des larves de poissons ou en
 
 ```{r}
 #| name: setup
-#| include: false
+knitr::opts_chunk$set(warnings= FALSE, message = FALSE)
 SciViews::R
 ```
 
 Les organismes planctoniques se définissent par l'incapacité de lutter contre le courant. On retrouve parmi ces organismes les méduses, les larves de poissons ou encore le krill. Ces organismes sont à la base de nombreuses chaines alimentaires. L'étude de la diversité, l'abondance ou encore de la biomasse du plancton et de leurs variations au cours du temps est indispensable dans la compréhension des écosystèmes.
 
-Le plancton est échantillonné principalement par des traits de filets. Chaque prélèvement permet la collecte de plusieurs centaines à quelques milliers d'organismes. La classification des organismes est facilitée à l'aide de la classification semi-automatisée. Les échantillons sont numérisés et analysés afin d'extraire chaque organisme. Grâce à un set d'apprentissage réalisé par des spécialistes du plancton, des algorithmes sont capables de classer les organismes. Il reste à l'expérimentateur à valider ce classement [@philippe2014].
+Le plancton est échantillonné principalement par des traits de filets. Chaque prélèvement permet la collecte de plusieurs centaines à milliers d'organismes. La classification des échantillons numérisés est réalisée de manière semi-automatisée. Un set d'apprentissage est réalisé par des spécialistes du plancton. Un modèle de *machine learning* entrainé avec ce set. Il est utilisé pour classer les organismes planctoniques de manière automatique dans le logiciel ZooImage [@philippe2014]. L'expérimentateur valide ensuite ce classement.
 
 ```{r}
 library("sf")
@@ -51,26 +94,22 @@ station_v <- filter(station, trait == "vertical")
 station_hv <- filter(station, trait == "horizontal-vertical")
 station_do <- filter(station, trait == "Double oblique")
 
-map <- ggplot(data = world) +
+ggplot(data = world) +
   geom_sf(color = "black", fill = "#C8AD7F") +
   coord_sf(xlim = c(-8, 40), ylim = c(30, 48), expand = FALSE) +
   xlab("Longitude") + ylab("Latitude") +
   ggtitle("Mer Méditerranée") +
   theme(panel.background = element_rect(fill="#80D0D0")) +
   annotation_north_arrow(location = "bl", which_north = "true",
-                         pad_x = unit(0, "in"), pad_y = unit(2.6, "in"),
+                         pad_x = unit(0, "in"), pad_y = unit(2.4, "in"),
                          style = north_arrow_fancy_orienteering) +
   annotation_scale(location = "bl") +
-  annotate(geom = "point", x = station_v$longitude, y = station_v$latitude, size = 3, color = "yellow") +
+  annotate(geom = "point", x = station_v$longitude, y = station_v$latitude, size = 3, color = "white") +
   annotate(geom = "point", x = station_hv$longitude, y = station_hv$latitude, size = 3, color = "red") +
   annotate(geom = "point", x = station_do$longitude, y = station_do$latitude, size = 3, color = "purple")
-
-map
-
-#ggsave(filename = "figures/r_figures/map.tiff", device = "tiff", units = "cm", width = 12, height = 8)
 ```
 
-En mer Méditerranée, on dénombre 9 séries temporelles étudiées en continu de plus de 10 ans. Différentes méthodes d'échantillonnages sont effectuées. La majorité des suivis sont effectués via des traits de filets verticaux (point jaune). En Espagne, il a été décidé de réaliser des traits de filets en double oblique (point mauve). La station de recherche de Calvi (Corse, France) a réalisé un suivi via des traits horizontaux et a débuté des prélèvements verticaux (point rouge).
+En Méditerranée, on dénombre neuf séries temporelles étudiées sur plus de 10 ans. La majorité des suivis sont effectués via des traits de filets verticaux (points jaunes). En Espagne, il a été décidé de réaliser des traits de filets en double oblique (points mauves). La station de recherche de Calvi (Corse, France) a réalisé un suivi via des traits horizontaux et a débuté des prélèvements verticaux depuis 2014 (point rouge).
 
 ```{r}
 tsh <- read(here::here("data/ts_horiz_abd_tot.rds"))
@@ -78,57 +117,48 @@ tsv <- read(here::here("data/ts_verti_abd_tot.rds"))
 
 chart(data = tsh, abd_tot ~ time) +
   geom_line() +
-  geom_line(data = tsv, color = "red")
-
-#ggsave("../figures/r_figures/adb_tot.tiff", 
-#  units="cm", device = "tiff", width = 12, height = 8)
+  geom_line(data = tsv, color = "red") +
+  ylab(expression(paste("Abondance totale [ind/",  m^{3}, "]")))
 ```
 
-La tendance globale entre la série obtenue vie les traits horizontaux (en noir) et via les traits verticaux (en rouge) est similaire. La série spatio-temporelle en subsurface a précédemment été étudiée. Cette étude a mis en évidence une année typique de la variation du plancton. Trois années particulières ont été détectées en 2007, 2012 et 2015. L'abondance totale au cours du temps y a été faible. Ces anomalies d'abondance en plancton sont corrélées avec la température et la disponibilité en nutriments [@fullgrabe2020a].
+Pour les données de Calvi, la tendance globale entre la série obtenue via les traits horizontaux (en noir) [@fullgrabe2020a] et les traits verticaux (en rouge) est similaire pour l'abondance totale. Cette série depuis 2014 offre l'opportunité de réalisé une comparaison plus détaillée entre échantillonnage vertical et horizontal.
 
 ```{r}
-#| include: false
-
 hv_comp <- read(here::here("data/hv_rel_abd.rds"))
 hv_comp <- hv_comp*100
 # Phaeodaria ----
 max_lab <- max(c(hv_comp$rel_abd_phaeodaria_v, hv_comp$rel_abd_phaeodaria_h))
 
 p1 <- chart(data = hv_comp, rel_abd_phaeodaria_v ~ rel_abd_phaeodaria_h) +
-  geom_abline(intercept = 0, color="black", linetype="dashed", size=1)+
+  geom_abline(intercept = 0, color = "black", linetype = "dashed", size=1)+
   geom_point(color = "#649B88") +
   scale_x_continuous(
-    name="abondance relative (%) traits horizontaux", 
+    name ="Abondance relative (%) \n traits horizontaux", 
     limits = c(0, max_lab*1.5)) +
       scale_y_continuous(
-        name="abondance relative (%) traits verticaux",
+        name ="Abondance relative (%) \n traits verticaux",
         limits = c(0, max_lab*1.5))+
-  geom_smooth(method = lm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
-  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
-  labs(title = "Phaeodaria")
-#p1
-#ggsave("../figures/r_figures/adb_rel_phaeo.tiff", 
-#  units= "cm", device = "tiff", width = 12, height = 8)
+  geom_smooth(method = MASS::rlm, formula = y~x-1, color = "red", linetype = "dashed", size = 0.8, se= FALSE) +
+  labs(title = "Phaeodaria") + 
+  coord_fixed()
 
 # Fritillaridae -----
 
 max_lab <- max(c(hv_comp$rel_abd_fritillariidae_v, hv_comp$rel_abd_fritillariidae_h))
 
 p2 <- chart(data = hv_comp, rel_abd_fritillariidae_v ~ rel_abd_fritillariidae_h) +
-  geom_abline(intercept = 0, color="black", linetype = "dashed", size = 1)+
+  geom_abline(intercept = 0, color = "black", linetype = "dashed", size = 1)+
   geom_point(color = "#649B88")+
   scale_x_continuous(
-    name="abondance relative (%) traits horizontaux", 
+    name="Abondance relative (%) \n traits horizontaux", 
     limits = c(0, max_lab*1.5))+
       scale_y_continuous(
-        name="abondance relative (%) traits verticaux",
+        name="Abondance relative (%) \n traits verticaux",
         limits = c(0, max_lab*1.5)) +
-  geom_smooth(method = MASS::rlm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
-  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
-  labs(title = "Fritillariidae")
-#p2
-#ggsave("../figures/r_figures/adb_rel_fritillaridae.tiff", 
-#  units= "cm", device = "tiff", width = 12, height = 8)
+  geom_smooth(method = MASS::rlm, formula = y~x-1, color = "red",linetype = "dashed", size = 0.8, se = FALSE) +
+  labs(title = "Fritillariidae") + 
+  coord_fixed()
+
 
 # Decapoda ----
 max_lab <- max(c(hv_comp$rel_abd_decapoda_zoea_larva_v, hv_comp$rel_abd_decapoda_zoea_larva_h))
@@ -137,18 +167,14 @@ p3 <- chart(data = hv_comp, rel_abd_decapoda_zoea_larva_v ~ rel_abd_decapoda_zoe
   geom_abline(intercept = 0, color="black", linetype="dashed", size=1)+
   geom_point(color = "#649B88")+
   scale_x_continuous(
-    name="abondance relative (%) traits horizontaux", 
+    name="Abondance relative (%) \n traits horizontaux", 
     limits = c(0, max_lab*1.5))+
       scale_y_continuous(
-        name="abondance relative (%) traits verticaux",
+        name="Abondance relative (%) \n traits verticaux",
         limits = c(0, max_lab*1.5)) +
-  geom_smooth(method = MASS::rlm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
-  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
-  labs(title = "Decapoda")
-
-#p3
-#ggsave("../figures/r_figures/adb_rel_decapoda.tiff", 
-#  units= "cm", device = "tiff", width = 12, height = 8)
+  geom_smooth(method = MASS::rlm, formula = y~x-1, color =" red",linetype = "dashed", size = 0.8, se = FALSE) +
+  labs(title = "Decapoda") + 
+  coord_fixed()
 
 # cladocera -----
 max_lab <- max(c(hv_comp$rel_abd_cladocera_other_v, hv_comp$rel_abd_cladocera_other_h))
@@ -157,27 +183,28 @@ p4 <- chart(data = hv_comp, rel_abd_cladocera_other_v ~ rel_abd_cladocera_other_
   geom_abline(intercept = 0, color="black", linetype="dashed", size=1)+
   geom_point(color = "#649B88")+
   scale_x_continuous(
-    name="abondance relative (%) traits horizontaux", 
+    name="Abondance relative (%) \n traits horizontaux", 
     limits = c(0, max_lab*1.5))+
       scale_y_continuous(
-        name="abondance relative (%) traits verticaux",
+        name="Abondance relative (%) \n traits verticaux",
         limits = c(0, max_lab*1.5)) +
-  geom_smooth(method = MASS::rlm, formula = y~x-1, color="red",linetype="dashed", size=0.8, se= FALSE) +
-  theme(legend.title = element_blank(),plot.title = element_text(hjust=0.5, size=12)) +
-  labs(title = "Cladocera")
-#p4
-#ggsave("../figures/r_figures/adb_rel_cladocera.tiff", 
-#  units= "cm", device = "tiff", width = 12, height = 8)
+  geom_smooth(method = MASS::rlm, formula = y~x-1, color = "red",linetype = "dashed", size = 0.8, se = FALSE) +
+  labs(title = "Cladocera") + 
+  coord_fixed()
+
+combine_charts(list(p1,p2,p3,p4),labels = NULL)
 ```
 
-```{r}
-combine_charts(list(p1,p2,p3,p4))
-```
+On dénombre 335 échantillons horizontaux et 76 verticaux dans la série de Calvi. En appliquant une fenêtre de tolérance de 2 jours entre les échantillons, 30 paires de prélèvements ont été retenus. Malgré une tendance globale similaire, la comparaison plus détaillées au niveau de groupes d'intérêt met en avant des différences.
 
-On dénombre 335 échantillons horizontaux et 76 verticaux. En appliquant une fenêtre de tolérance de 2 jours d'écart maximum et de 2h d'écart, 30 stations ont été retenues. Malgré une tendance globale similaire, la comparaison des groupes d'intérêt met en avant des différences.
-
-La sous-classe des Phaedoria (chromiste) et la famille des Fritillaridea (tunicier) sont plus abondantes dans les traits de filets verticaux alors que l'ordre des Decapoda (crustacée) et l'ordre des Cladocera (crustacée) sont plus abondants dans les traits de plancton horizontaux.
+La sous-classe des *Phaeodaria* (chromiste) et la famille des *Fritillariidea* (tunicier) sont plus abondantes dans les traits de filets verticaux alors que l'ordre des *Decapoda* (crustacé) et l'ordre des *Cladocera* (crustacé) sont plus abondants dans les traits horizontaux.
 
 # Perspectives
 
-La comparaison par station similaire réduit trop fortement le nombre d'observations. La prochaine étape de cette étude est de proposer une comparaison avec les deux séries temporelles directement afin d'utiliser l'ensemble des données disponibles. Cette comparaison va permettre de faire le lien entre les traits verticaux et les traits horizontaux.
+La comparaison par paires de prélèvements réduit trop fortement le nombre de données. La prochaine étape de cette étude est de proposer une comparaison avec les deux séries temporelles directement afin d'utiliser l'ensemble de l'information disponible.
+
+Cette comparaison va permettre de faire le lien entre les traits verticaux et les traits horizontaux. L'objectif est de déterminer à quel point la série horizontale long terme de Calvi est comparable aux autres séries.
+
+# Remerciements
+
+Ceci est une contribution au projet STAtion of Reference and rEsearch on Change of local and global Anthropogenic Pressures on Mediterrannean Ecosystems Drifts (STARECAPMED). L'institut COMPLEXYS de l'Université de MONS (UMONS) a co-financé ce travail.
